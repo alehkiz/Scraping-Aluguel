@@ -1,8 +1,10 @@
+import time
 from urllib.parse import urlsplit
 from selenium.webdriver import Firefox
 from selenium.webdriver.common.by import By
 from dataclasses import dataclass
 import config
+from re import findall
 
 @dataclass
 class House:
@@ -37,6 +39,24 @@ class Scraper(Firefox):
         _splited_url_base = urlsplit(config.url_base)
         _splited_url = urlsplit(url)
         return _splited_url.netloc == _splited_url_base.netloc
+
+    @staticmethod
+    def get_int_from_string(string : str) -> int:
+        """Receive a var `string` and return a int from text. If hasn't a integer return `None`
+
+        Args:
+            string (str): Text that will get integers
+
+        Returns:
+            int: if `string` has integers, else return `None`
+        """        
+        integers = findall(r'\d+', string)
+
+        if not integers:
+            return None
+        return int(''.join(integers))
+
+        
             
     def load(self):
         house = House()
@@ -44,6 +64,7 @@ class Scraper(Firefox):
         items = result_content.find_elements(By.CLASS_NAME, 'property-card__content-link')
         for item in items:
             item.click()
+            time.sleep(3)
             _new_window = self.driver.window_handles[-1]
             self.driver.switch_to.window(_new_window)
             house.url = self.driver.current_url
@@ -52,9 +73,9 @@ class Scraper(Firefox):
             feats = feats.find_elements(By.TAG_NAME, 'li')
             dic_feats = {_.get_attribute('title').lower():_.text for _ in feats}
             house.area = dic_feats['área'][0: dic_feats['área'].find('m')]
-            house.bedrooms = int(dic_feats['quartos'])
-            house.bathrooms = [int(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
-            house.parking = int(dic_feats['vagas'])
+            house.bedrooms = Scraper.get_int_from_string(dic_feats['quartos'])
+            house.bathrooms = [Scraper.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
+            house.parking = Scraper.get_int_from_string(dic_feats['vagas'])
             amen = self.driver.find_element(By.CLASS_NAME, 'js-more-amenities')
             amen_open = self.driver.find_element(By.CLASS_NAME, 'more-amenities')
             amen_open.click()
@@ -63,7 +84,7 @@ class Scraper(Firefox):
             amen_close = self.driver.find_element(By.CLASS_NAME, 'amenities__button-close')
             amen_close.click()
             price_content = self.driver.find_element(By.CLASS_NAME, 'price-container')
-            house.price['rent'] = ''.join([_ for _ in price_content.find_element(By.CLASS_NAME, 'price__price-info').text if _.isnumeric()])
+            house.price['rent'] = ''.join([Scraper.get_int_from_string(_.text) for _ in price_content.find_elements(By.CLASS_NAME, 'price__price-info')])
             price_list = price_content.find_element(By.CLASS_NAME, 'price__list')
             items_price = price_list.find_elements(By.TAG_NAME, 'span')
             price_iterator = range(0, len(items_price), 2)
