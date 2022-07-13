@@ -1,12 +1,16 @@
-import time
-from urllib.parse import urlsplit, urlunsplit, urlencode, parse_qs
 from selenium.webdriver import Firefox
 from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
+
+import time
+from datetime import timedelta, datetime
+from urllib.parse import urlsplit, urlunsplit, urlencode, parse_qs
 from dataclasses import dataclass, field
 from typing import Dict, List
 import config
 from re import findall
 import pickle
+from os.path import isfile
 
 @dataclass
 class House:
@@ -29,8 +33,13 @@ class House:
 links = list()
 
 class Scraper(Firefox):
-    def __init__(self):
-        self.driver = Firefox()
+    def __init__(self, headless=False):
+        if headless:
+            options = Options()
+            options.headless = True
+            self.driver = Firefox(options=options)
+        else:
+            self.driver = Firefox()
         self.driver.get(config.url_base)
         self.main_window = self.driver.current_window_handle
         self.houses = []
@@ -73,24 +82,40 @@ class Scraper(Firefox):
         query_encoded = urlencode(query, doseq=True)
         return urlunsplit((scheme, netloc, path, query_encoded, fragment))
     # terminamos na pagina 33
-    def load(self):
-        current_page = 1
-        house = House()
+    def load(self, page_num:int):
+        lst_save_time = datetime.now()
+        save_time = timedelta(minutes=3)
+        current_page = page_num
         self.driver.implicitly_wait(4)
         for i in range(0, 100):
             time.sleep(10)
-            result_content = self.driver.find_element(By.CLASS_NAME, 'results-list')
-            items = result_content.find_elements(By.CLASS_NAME, 'property-card__content-link')
-            links.extend([_.get_attribute('href') for _ in items])
-            current_page += 1
-            new_url = Scraper.change_query_string_on_url(self.driver.current_url, {'pagina': current_page})
-            self.driver.get(new_url)
+            try:
+                result_content = self.driver.find_element(By.CLASS_NAME, 'results-list')
+                items = result_content.find_elements(By.CLASS_NAME, 'property-card__content-link')
+                links.extend([_.get_attribute('href') for _ in items])
+                current_page += 1
+                new_url = Scraper.change_query_string_on_url(self.driver.current_url, {'pagina': current_page})
+                self.driver.get(new_url)
+            except Exception as e:
+                print(f'Página {current_page} houve um erro\n {e}')
+            if datetime.now() > (lst_save_time + save_time):
+                _temp_links = self.load_links()
+                _temp_links.extend(links)
+                self.save_links(_temp_links)
+                print(f'Links salvos às {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}, pagina {current_page}')
+                lst_save_time = datetime.now()
             
     def get_info(self, list_links = []):
         if not list_links:
             list_links = links
-
+        lst_save_time = datetime.now()
+        save_time = timedelta(minutes=3)
+        if not self.houses:
+            self.houses = self.load_houses()
+        saved_links = [_.url for _ in self.houses]
         for link in list_links:
+            if link in saved_links:
+                continue
             house = House()
             self.driver.get(link)
             time.sleep(3)
@@ -117,11 +142,12 @@ class Scraper(Firefox):
                 amen_open.click()
                 amenities = amen.find_elements(By.TAG_NAME, 'li')
                 house.amenities = [_.text for _ in amenities]
+                amen_close = self.driver.find_element(By.CLASS_NAME, 'amenities__button-close')
+                amen_close.click()
             except Exception as e:
                 house.amenities = []
                 print('Facilidade não encontrada')
-            amen_close = self.driver.find_element(By.CLASS_NAME, 'amenities__button-close')
-            amen_close.click()
+            
             price_content = self.driver.find_element(By.CLASS_NAME, 'price-container')
             price_info = Scraper.get_int_from_string(price_content.find_element(By.CLASS_NAME, 'price__price-info').text)
             house.price['rent'] = price_info if price_info != None else ''
@@ -132,20 +158,43 @@ class Scraper(Firefox):
 
             house.price = dict(rent=house.price['rent'], **dic_price)
             self.houses.append(house)
-            # self.driver.close()
-            # self.driver.switch_to.window(self.driver.window_handles[0])
+            if datetime.now() > (lst_save_time + save_time):
+                _temp_houses = self.load_houses()
+                _temp_houses.extend(self.houses)
+                self.save_houses(_temp_houses)
+                print(f'Links salvos às {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}')
+                lst_save_time = datetime.now()
 
-        # for item in items:
-        #     item.click()
-        #     
+    def load_houses(self):
+        return self.load_file(config.houses_file)
+    
+    def save_houses(self, list_houses):
+        if not list_houses:
+            list_houses = self.houses
+            print('House está vazia')
+        return self.save_file(config.houses_file, list_houses)
 
     def save_links(self, list_links):
         if not list_links:
             list_links = links
             print('Links está vazia')
-        with open(config.links_file, 'wb') as f:
-            pickle.dump(links, f)
+        return self.save_file(config.links_file, list_links)
     
     def load_links(self):
-        with open(config.links_file, 'rb') as f:
+        return self.load_file(config.links_file)
+
+    def load_file(self, file_path: str):
+        if not isfile(file_path):
+            raise FileNotFoundError(f'{file_path} não existe.')
+        with open(file_path, 'rb') as f:
             return pickle.load(f)
+    
+    def save_file(self, file_path:str, to_save):
+        """Save a file with var to_save
+
+        Args:
+            file_path (str): Path of file
+            to_save : Variable that will be saved in file
+        """        
+        with open(file_path, 'wb') as f:
+            pickle.dump(to_save, f)
