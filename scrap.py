@@ -104,81 +104,99 @@ class Scraper(Firefox):
                 self.save_links(_temp_links)
                 print(f'Links salvos às {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}, pagina {current_page}')
                 lst_save_time = datetime.now()
-            
-    def get_info(self, list_links = []):
+    def get_info(self, link : str, save = True):
+        house = House()
+        self.driver.get(link)
+        time.sleep(4)
+        # _new_window = self.driver.window_handles[-1]
+        # self.driver.switch_to.window(_new_window)
+        try:
+            cookie_bt = self.driver.find_element(By.CLASS_NAME, 'cookie-notifier__cta')
+            cookie_bt.click()
+        except Exception as e:
+            pass
+        # time.sleep(1)
+        house.url = self.driver.current_url
+        house.title = self.driver.find_element(By.CLASS_NAME, 'title__title').text
+        feats = self.driver.find_element(By.CLASS_NAME, 'features')
+        feats = feats.find_elements(By.TAG_NAME, 'li')
+        dic_feats = {_.get_attribute('title').lower():_.text for _ in feats}
+        house.area = dic_feats['área'][0: dic_feats['área'].find('m')]
+        house.bedrooms = Scraper.get_int_from_string(dic_feats['quartos'])
+        house.bathrooms = [Scraper.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
+        house.parking = Scraper.get_int_from_string(dic_feats['vagas'])
+        try:
+            amen = self.driver.find_element(By.CLASS_NAME, 'js-more-amenities')
+            amen_open = self.driver.find_element(By.CLASS_NAME, 'more-amenities')
+            amen_open.click()
+            amenities = amen.find_elements(By.TAG_NAME, 'li')
+            house.amenities = [_.text for _ in amenities]
+            amen_close = self.driver.find_element(By.CLASS_NAME, 'amenities__button-close')
+            amen_close.click()
+        except Exception as e:
+            house.amenities = []
+            print('Facilidade não encontrada')
+        
+        price_content = self.driver.find_element(By.CLASS_NAME, 'price-container')
+        price_info = Scraper.get_int_from_string(price_content.find_element(By.CLASS_NAME, 'price__price-info').text)
+        house.price['rent'] = price_info if price_info != None else ''
+        price_list = price_content.find_element(By.CLASS_NAME, 'price__list')
+        items_price = price_list.find_elements(By.TAG_NAME, 'span')
+        price_iterator = range(0, len(items_price)-1, 2)
+        dic_price = {items_price[_].text:items_price[_+1].text for _ in price_iterator}
+
+        house.price = dict(rent=house.price['rent'], **dic_price)
+        self.houses.append(house)
+        if save is True:
+            self.save_houses([house])
+        return house
+
+    def get_batch(self, list_links = [], save_interval=3):
         if not list_links:
             list_links = links
         lst_save_time = datetime.now()
-        save_time = timedelta(minutes=3)
+        save_time = timedelta(minutes=save_interval)
         if not self.houses:
             self.houses = self.load_houses()
         saved_links = [_.url for _ in self.houses]
+        if not isinstance(list_links, list):
+            raise Exception(f'{list_links} incorreto')
         for link in list_links:
+            print(link)
             if link in saved_links:
                 continue
-            house = House()
-            self.driver.get(link)
-            time.sleep(3)
-            _new_window = self.driver.window_handles[-1]
-            self.driver.switch_to.window(_new_window)
-            try:
-                cookie_bt = self.driver.find_element(By.CLASS_NAME, 'cookie-notifier__cta')
-                cookie_bt.click()
-            except Exception as e:
-                pass
-            time.sleep(1)
-            house.url = self.driver.current_url
-            house.title = self.driver.find_element(By.CLASS_NAME, 'title__title').text
-            feats = self.driver.find_element(By.CLASS_NAME, 'features')
-            feats = feats.find_elements(By.TAG_NAME, 'li')
-            dic_feats = {_.get_attribute('title').lower():_.text for _ in feats}
-            house.area = dic_feats['área'][0: dic_feats['área'].find('m')]
-            house.bedrooms = Scraper.get_int_from_string(dic_feats['quartos'])
-            house.bathrooms = [Scraper.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
-            house.parking = Scraper.get_int_from_string(dic_feats['vagas'])
-            try:
-                amen = self.driver.find_element(By.CLASS_NAME, 'js-more-amenities')
-                amen_open = self.driver.find_element(By.CLASS_NAME, 'more-amenities')
-                amen_open.click()
-                amenities = amen.find_elements(By.TAG_NAME, 'li')
-                house.amenities = [_.text for _ in amenities]
-                amen_close = self.driver.find_element(By.CLASS_NAME, 'amenities__button-close')
-                amen_close.click()
-            except Exception as e:
-                house.amenities = []
-                print('Facilidade não encontrada')
-            
-            price_content = self.driver.find_element(By.CLASS_NAME, 'price-container')
-            price_info = Scraper.get_int_from_string(price_content.find_element(By.CLASS_NAME, 'price__price-info').text)
-            house.price['rent'] = price_info if price_info != None else ''
-            price_list = price_content.find_element(By.CLASS_NAME, 'price__list')
-            items_price = price_list.find_elements(By.TAG_NAME, 'span')
-            price_iterator = range(0, len(items_price)-1, 2)
-            dic_price = {items_price[_].text:items_price[_+1].text for _ in price_iterator}
-
-            house.price = dict(rent=house.price['rent'], **dic_price)
-            self.houses.append(house)
+            self.houses.append(self.get_info(link))
             if datetime.now() > (lst_save_time + save_time):
                 _temp_houses = self.load_houses()
                 _temp_houses.extend(self.houses)
                 self.save_houses(_temp_houses)
                 print(f'Links salvos às {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}')
                 lst_save_time = datetime.now()
-
+        _temp_houses = self.load_houses()
+        _temp_houses.extend(self.houses)
+        self.save_houses(_temp_houses)
     def load_houses(self):
         return self.load_file(config.houses_file)
     
     def save_houses(self, list_houses):
+        if isfile(config.houses_file):
+            _temp_houses = self.load_houses()
+        else:
+            if not list_houses:
+                raise Exception('list_house vazia')
         if not list_houses:
             list_houses = self.houses
             print('House está vazia')
-        return self.save_file(config.houses_file, list_houses)
+        _temp_houses.extend(list_houses)
+        return self.save_file(config.houses_file, _temp_houses)
 
     def save_links(self, list_links):
+        _temp_links = self.load_links()
         if not list_links:
             list_links = links
             print('Links está vazia')
-        return self.save_file(config.links_file, list_links)
+        _temp_links.extend(list_links)
+        self.save_file(config.links_file, _temp_links)
     
     def load_links(self):
         return self.load_file(config.links_file)
