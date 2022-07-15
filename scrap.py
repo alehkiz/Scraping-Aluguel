@@ -107,17 +107,23 @@ class Scraper(Firefox):
     def get_info(self, link : str, save = True):
         house = House()
         self.driver.get(link)
-        time.sleep(4)
+        time.sleep(1)
         # _new_window = self.driver.window_handles[-1]
         # self.driver.switch_to.window(_new_window)
-        try:
-            cookie_bt = self.driver.find_element(By.CLASS_NAME, 'cookie-notifier__cta')
-            cookie_bt.click()
-        except Exception as e:
-            pass
+        # try:
+        #     cookie_bt = self.driver.find_element(By.CLASS_NAME, 'cookie-notifier__cta')
+        #     cookie_bt.click()
+        # except Exception as e:
+        #     pass
         # time.sleep(1)
         house.url = self.driver.current_url
         house.title = self.driver.find_element(By.CLASS_NAME, 'title__title').text
+        try:
+            inactive = self.driver.find_element(By.CLASS_NAME, 'inactive-udp__alert')
+            if inactive.text == 'Você está vendo esta página porque o imóvel que buscava foi alugado ou está indisponível. ':
+                house.code = 'INATIVO'
+        except Exception as e:
+            ...        
         feats = self.driver.find_element(By.CLASS_NAME, 'features')
         feats = feats.find_elements(By.TAG_NAME, 'li')
         dic_feats = {_.get_attribute('title').lower():_.text for _ in feats}
@@ -125,18 +131,25 @@ class Scraper(Firefox):
         house.bedrooms = Scraper.get_int_from_string(dic_feats['quartos'])
         house.bathrooms = [Scraper.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
         house.parking = Scraper.get_int_from_string(dic_feats['vagas'])
+        
+            
+        # try:
+        #     amen = self.driver.find_element(By.CLASS_NAME, 'js-more-amenities')
+        #     amen_open = self.driver.find_element(By.CLASS_NAME, 'more-amenities')
+        #     amen_open.click()
+        #     amenities = amen.find_elements(By.TAG_NAME, 'li')
+        #     house.amenities = [_.text for _ in amenities]
+        #     amen_close = self.driver.find_element(By.CLASS_NAME, 'amenities__button-close')
+        #     amen_close.click()
+        # except Exception as e:
+        #     house.amenities = []
+        #     print('Facilidade não encontrada')
         try:
-            amen = self.driver.find_element(By.CLASS_NAME, 'js-more-amenities')
-            amen_open = self.driver.find_element(By.CLASS_NAME, 'more-amenities')
-            amen_open.click()
-            amenities = amen.find_elements(By.TAG_NAME, 'li')
-            house.amenities = [_.text for _ in amenities]
-            amen_close = self.driver.find_element(By.CLASS_NAME, 'amenities__button-close')
-            amen_close.click()
+            amen = self.driver.find_elements(By.CLASS_NAME, 'amenities__list')
+            house.amenities = [x.get_attribute('title') for x in amen.find_elements(By.CSS_SELECTOR, '*') if x.tag_name == 'li']
         except Exception as e:
             house.amenities = []
-            print('Facilidade não encontrada')
-        
+
         price_content = self.driver.find_element(By.CLASS_NAME, 'price-container')
         price_info = Scraper.get_int_from_string(price_content.find_element(By.CLASS_NAME, 'price__price-info').text)
         house.price['rent'] = price_info if price_info != None else ''
@@ -158,6 +171,9 @@ class Scraper(Firefox):
         save_time = timedelta(minutes=save_interval)
         if not self.houses:
             self.houses = self.load_houses()
+        # print(type(self.houses))
+        if self.houses is None:
+            self.houses = []
         saved_links = [_.url for _ in self.houses]
         if not isinstance(list_links, list):
             raise Exception(f'{list_links} incorreto')
@@ -175,6 +191,7 @@ class Scraper(Firefox):
         _temp_houses = self.load_houses()
         _temp_houses.extend(self.houses)
         self.save_houses(_temp_houses)
+        print('Finalizando\n\n')
     def load_houses(self):
         return self.load_file(config.houses_file)
     
@@ -184,9 +201,10 @@ class Scraper(Firefox):
         else:
             if not list_houses:
                 raise Exception('list_house vazia')
-        if not list_houses:
-            list_houses = self.houses
-            print('House está vazia')
+        if _temp_houses is None:
+            _temp_houses = []
+        # if not list_houses:
+        list_houses = self.houses
         _temp_houses.extend(list_houses)
         return self.save_file(config.houses_file, _temp_houses)
 
@@ -205,7 +223,10 @@ class Scraper(Firefox):
         if not isfile(file_path):
             raise FileNotFoundError(f'{file_path} não existe.')
         with open(file_path, 'rb') as f:
-            return pickle.load(f)
+            try: 
+                return pickle.load(f)
+            except EOFError as e:
+                EOFError('Arquivo vazio', e)
     
     def save_file(self, file_path:str, to_save):
         """Save a file with var to_save
