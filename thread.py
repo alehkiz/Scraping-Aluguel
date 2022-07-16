@@ -2,10 +2,10 @@ import threading
 import time
 
 from requests import head
-from scrap import Scraper
+from scrap_selenium import Selenium
 
 
-sc = Scraper()
+sc = Selenium()
 
 links = sc.load_links()
 
@@ -20,7 +20,7 @@ dic_links = {_:False for _ in links}
 #threads
 
 def func(barrier, links):
-    _sc = Scraper()
+    _sc = Selenium()
     _sc.get_batch(links)
     _sc.driver.close()
     print('wait for others')
