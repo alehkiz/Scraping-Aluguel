@@ -101,6 +101,7 @@ class Selenium(Scraper):
         for link in list_links:
             if link in self.houses.keys():
                 continue
+            self.get_info(link)
             # self.houses.append(self.get_info(link))
             if datetime.now() > (lst_save_time + save_time):
                 self.save_houses()

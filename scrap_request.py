@@ -14,12 +14,72 @@ class Request(Scraper):
         lst_save_time = datetime.now()
         save_time = timedelta(minutes=3)
         current_page = page_num
+        current_url_page = config.url_base
         for i in range(0, limit_range):
             url = Request.change_query_string_on_url(config.url_base, {'pagina': current_page})
-            res = requests.get(url)
+            try:
+                res = requests.get(url)
+            except Exception as e:
+                print(f'Houve uma exceção na página {current_page}\n{e}')
             if res.status_code != 200:
                 raise Exception(f'Ocorreu um erro no acesso: {res.status_code}')
             soup = BS(res.text, 'html.parser')
             result = soup.find(class_ = 'results-list')
             items = result.find_all(class_ = 'property-card__content-link')
-            self.links.extend([_.get('href')])
+            self.links.extend([_.get('href') for _ in items])
+            current_page += 1
+            current_url_page = Request.change_query_string_on_url(current_url_page, {'pagina': current_page})
+        self.save_links()
+        print(f'Links salvos às {datetime.now().strftime("%d/%m/%y, %H:%M:%S")}, página: {current_page}')
+    def get_info(self, url : str, save=True):
+        house = House()
+        try:
+            res =  requests.get(url)
+        except Exception as e:
+            print(f'Houve uma exceção na página {url}\n{e}')
+        soup = BS(res.text, 'html.parser')
+        house.title = soup.find(class_ = 'title__title').text
+        feats = soup.find(class_= 'features')
+        dic_feats = {_.get('title').lower():_.text.strip() for _ in feats.find_all()}
+        house.area = Request.get_int_from_string(dic_feats['área'])
+        house.bedrooms = Request.get_int_from_string(dic_feats['quartos'])
+        house.bathrooms = [Request.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
+        house.parking = Request.get_int_from_string(dic_feats['vagas'])
+        amen = soup.find_all(class_='amenities__list')
+        if amen is None:
+            house.amenities = []
+        else:
+            house.amenities = [x.get('title') for x in amen.find_all('li')]
+        price_content = soup.find(class_='price-container')
+        price_info = Request.get_int_from_string(price_content.find(class_='price__price-info'))
+        house.price['rend'] = price_info if price_info != None else ''
+        price_list = price_content.find(class_='price__list')
+        items_price = price_list.find_all('span')
+        price_iterator = range(0, len(items_price)-1, 2)
+        dic_price = {items_price[_].text:items_price[_+1].text for _ in price_iterator}
+        house.price = dict(rent=house.price['rent'], **dic_price)
+
+        self.houses[url] = house
+
+        if save is True:
+            self.save_houses([house])
+        return house
+
+    def get_batch(self, list_links = [], save_interval=3):
+        start_time = time.time()
+        if not list_links:
+            list_links = self.links
+        lst_save_time = datetime.now()
+        save_time = timedelta(minutes=save_interval)
+        if not isinstance(list_links, list):
+            raise Exception(f'{list_links} incorreto')
+        for link in list_links:
+            if link in self.houses.keys():
+                continue
+            self.get_info(link)
+            if datetime.now() > (lst_save_time + save_time):
+                self.save_houses()
+                print(f'Houses salvas às {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}')
+                lst_save_time = datetime.now()
+        self.save_houses()
+        print(f'Finalizando\nTempo total: {time.time() - start_time} segundos')
