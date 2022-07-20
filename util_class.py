@@ -64,6 +64,7 @@ class Scraper:
 
     def load_file(self, file_path: str):
         if not isfile(file_path):
+            return None
             raise FileNotFoundError(f'{file_path} não existe.')
         with open(file_path, 'rb') as f:
             try: 

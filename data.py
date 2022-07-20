@@ -19,4 +19,4 @@ class House:
     code:str = None
     title:str = None
 
-links = list()
+links = {}
