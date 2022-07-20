@@ -52,26 +52,34 @@ class Request(Scraper):
                     res = requests.get(url)
 
         soup = BS(res.text, 'html.parser')
-        house.title = soup.find(class_ = 'title__title').text
-        feats = soup.find(class_= 'features')
-        dic_feats = {_.get('title').lower():_.text.strip() for _ in feats.find_all() if _.get('title') != None}
-        house.area = Request.get_int_from_string(dic_feats['área'])
-        house.bedrooms = Request.get_int_from_string(dic_feats['quartos'])
-        house.bathrooms = [Request.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
-        house.parking = Request.get_int_from_string(dic_feats['vagas'])
-        amen = soup.find_all(class_='amenities__list')
-        if amen is None:
-            house.amenities = []
-        else:
-            house.amenities = reduce(lambda x, y: x+y, [[_.get('title') for _ in x.find_all('li')] for x in amen])
-        price_content = soup.find(class_='price-container')
-        price_info = Request.get_int_from_string(price_content.find(class_='price__price-info').text)
-        house.price['rent'] = price_info if price_info != None else ''
-        price_list = price_content.find(class_='price__list')
-        items_price = price_list.find_all('span')
-        price_iterator = range(0, len(items_price)-1, 2)
-        dic_price = {items_price[_].text:items_price[_+1].text for _ in price_iterator}
-        house.price = dict(rent=house.price['rent'], **dic_price)
+        try:
+            inactive = soup.find(class_='inactive-udp__alert')
+            if inactive.text.strip() == 'Você está vendo esta página porque o imóvel que buscava foi alugado ou está indisponível.':
+                house.code = 'INATIVO'
+                print('Imóvel inativo')
+        except Exception as e:
+            ...
+        if house.code != 'INATIVO':
+            house.title = soup.find(class_ = 'title__title').text
+            feats = soup.find(class_= 'features')
+            dic_feats = {_.get('title').lower():_.text.strip() for _ in feats.find_all() if _.get('title') != None}
+            house.area = Request.get_int_from_string(dic_feats['área'])
+            house.bedrooms = Request.get_int_from_string(dic_feats['quartos'])
+            house.bathrooms = [Request.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
+            house.parking = Request.get_int_from_string(dic_feats['vagas'])
+            amen = soup.find_all(class_='amenities__list')
+            if not amen:
+                house.amenities = []
+            else:
+                house.amenities = reduce(lambda x, y: x+y, [[_.get('title') for _ in x.find_all('li')] for x in amen])
+            price_content = soup.find(class_='price-container')
+            price_info = Request.get_int_from_string(price_content.find(class_='price__price-info').text)
+            house.price['rent'] = price_info if price_info != None else ''
+            price_list = price_content.find(class_='price__list')
+            items_price = price_list.find_all('span')
+            price_iterator = range(0, len(items_price)-1, 2)
+            dic_price = {items_price[_].text:items_price[_+1].text for _ in price_iterator}
+            house.price = dict(rent=house.price['rent'], **dic_price)
 
         self.houses[url] = house
 
