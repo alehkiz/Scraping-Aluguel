@@ -6,6 +6,7 @@ import config
 from data import House
 from util_class import Scraper
 from functools import reduce
+from tqdm import tqdm
 
 class Request(Scraper):
     def __init__(self) -> None:
@@ -17,7 +18,7 @@ class Request(Scraper):
         save_time = timedelta(minutes=3)
         current_page = page_num
         current_url_page = config.url_base
-        for i in range(0, limit_range):
+        for i in tqdm(range(0, limit_range)):
             time.sleep(5)
             url = Request.change_query_string_on_url(config.url_base, {'pagina': current_page})
             try:
@@ -35,8 +36,8 @@ class Request(Scraper):
         self.save_links()
         print(f'Links salvos às {datetime.now().strftime("%d/%m/%y, %H:%M:%S")}, página: {current_page}')
     def get_info(self, url : str, save=True):
-        time.sleep(5)
-        print(f'Iniciando a URL: {url}')
+        time.sleep(2)
+        # print(f'Iniciando a URL: {url}')
         house = House()
         try:
             res =  requests.get(url)
@@ -95,7 +96,7 @@ class Request(Scraper):
         save_time = timedelta(minutes=save_interval)
         if not isinstance(list_links, list):
             raise Exception(f'{list_links} incorreto')
-        for link in list_links:
+        for link in tqdm(list_links):
             if link in self.houses.keys():
                 continue
             self.get_info(link)
