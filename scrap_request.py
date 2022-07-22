@@ -19,25 +19,25 @@ class Request(Scraper):
         current_page = page_num
         current_url_page = config.url_base
         for i in tqdm(range(0, limit_range)):
-            time.sleep(5)
+            time.sleep(1)
             url = Request.change_query_string_on_url(config.url_base, {'pagina': current_page})
             try:
                 res = requests.get(url)
             except Exception as e:
                 print(f'Houve uma exceção na página {current_page}\n{e}')
             if res.status_code != 200:
-                raise Exception(f'Ocorreu um erro no acesso: {res.status_code}')
+                raise Exception(f'Ocorreu um erro no acesso: {res.status_code}, página: {url}')
             soup = BS(res.text, 'html.parser')
             result = soup.find(class_ = 'results-list')
             items = result.find_all(class_ = 'property-card__content-link')
-            self.links.extend([_.get('href') for _ in items])
+            self.links.extend(['https://www.vivareal.com.br'+_.get('href') for _ in items])
             current_page += 1
             current_url_page = Request.change_query_string_on_url(current_url_page, {'pagina': current_page})
         self.save_links()
         print(f'Links salvos às {datetime.now().strftime("%d/%m/%y, %H:%M:%S")}, página: {current_page}')
     def get_info(self, url : str, save=True):
         time.sleep(2)
-        # print(f'Iniciando a URL: {url}')
+        # print(f'Iniciando a URL: {url}')5
         house = House()
         try:
             res =  requests.get(url)

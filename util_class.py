@@ -57,6 +57,8 @@ class Scraper:
         #     list_links = self.links
         #     print('Links está vazia')
         # _temp_links.extend(list_links)
+        _temp_links = self.load_links()
+        self.links = list(set(_temp_links+self.links))
         self.save_file(config.links_file, self.links)
     
     def load_links(self):
