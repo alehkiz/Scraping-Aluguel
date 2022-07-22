@@ -62,6 +62,7 @@ class Request(Scraper):
             ...
         if house.code != 'INATIVO':
             house.title = soup.find(class_ = 'title__title').text
+            house.address = soup.find(class_= 'title__address').text
             feats = soup.find(class_= 'features')
             dic_feats = {_.get('title').lower():_.text.strip() for _ in feats.find_all() if _.get('title') != None}
             house.area = Request.get_int_from_string(dic_feats['área'])
@@ -98,7 +99,8 @@ class Request(Scraper):
             raise Exception(f'{list_links} incorreto')
         for link in tqdm(list_links):
             if link in self.houses.keys():
-                continue
+                if not self.houses[link].address is None:
+                    continue
             self.get_info(link)
             if datetime.now() > (lst_save_time + save_time):
                 self.save_houses()
