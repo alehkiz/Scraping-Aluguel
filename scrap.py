@@ -34,20 +34,20 @@ class Request(Scraper):
             current_page += 1
             current_url_page = Request.change_query_string_on_url(current_url_page, {'pagina': current_page})
         self.save_links()
-        print(f'Links salvos às {datetime.now().strftime("%d/%m/%y, %H:%M:%S")}, página: {current_page}')
+        # print(f'Links salvos às {datetime.now().strftime("%d/%m/%y, %H:%M:%S")}, página: {current_page}')
     def get_info(self, url : str, save=True):
         time.sleep(2)
-        # print(f'Iniciando a URL: {url}')5
         house = House()
         try:
             res =  requests.get(url)
         except Exception as e:
-            print(f'Houve uma exceção na página {url}\n{e}')
+            ...
+            # print(f'Houve uma exceção na página {url}\n{e}')
         if res.status_code != 200:
                 while True:
                     if res.status_code == 429:
-                        print(f'Limite de acessos esgotado! Aguardando 2 minutos')
-                        time.sleep(120)
+                        print(f'Limite de acessos esgotado! Aguardando 1 minuto')
+                        time.sleep(60)
                     else:
                         break
                     res = requests.get(url)
@@ -57,7 +57,8 @@ class Request(Scraper):
             inactive = soup.find(class_='inactive-udp__alert')
             if inactive.text.strip() == 'Você está vendo esta página porque o imóvel que buscava foi alugado ou está indisponível.':
                 house.code = 'INATIVO'
-                print('Imóvel inativo')
+                # print('Imóvel inativo')
+                # print(f'URL {url}')
         except Exception as e:
             ...
         if house.code != 'INATIVO':
@@ -84,7 +85,6 @@ class Request(Scraper):
             house.price = dict(rent=house.price['rent'], **dic_price)
 
         self.houses[url] = house
-
         if save is True:
             self.save_houses()
         return house
@@ -99,12 +99,11 @@ class Request(Scraper):
             raise Exception(f'{list_links} incorreto')
         for link in tqdm(list_links):
             if link in self.houses.keys():
-                if not self.houses[link].address is None:
-                    continue
+                continue
             self.get_info(link)
             if datetime.now() > (lst_save_time + save_time):
                 self.save_houses()
-                print(f'Houses salvas às {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}')
+                # print(f'Houses salvas às {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}')
                 lst_save_time = datetime.now()
         self.save_houses()
-        print(f'Finalizando\nTempo total: {time.time() - start_time} segundos')
+        # print(f'Finalizando\nTempo total: {time.time() - start_time} segundos')
