@@ -18,5 +18,6 @@ class House:
     publisher_name: str = None
     code:str = None
     title:str = None
+    code:str = None
 
 links = {}

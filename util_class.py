@@ -49,6 +49,9 @@ class Scraper:
         return self.load_file(config.houses_file)
     
     def save_houses(self):
+        _temp = self.houses
+        self.houses = self.load_houses()
+        self.houses = dict(self.houses, **_temp)
         self.save_file(config.houses_file, self.houses)
 
     def save_links(self):
