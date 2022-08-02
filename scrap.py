@@ -26,7 +26,7 @@ class Request(Scraper):
             except Exception as e:
                 print(f'Houve uma exceção na página {current_page}\n{e}')
             if res.status_code != 200:
-                raise Exception(f'Ocorreu um erro no acesso: {res.status_code}, página: {url}')
+                print(f'Ocorreu um erro no acesso: {res.status_code}, página: {url}')
             soup = BS(res.text, 'html.parser')
             result = soup.find(class_ = 'results-list')
             items = result.find_all(class_ = 'property-card__content-link')
