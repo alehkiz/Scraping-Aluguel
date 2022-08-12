@@ -17,6 +17,7 @@ class House:
     transport: str = None
     publisher_name: str = None
     code:str = None
+    type:str = None #Compra ou aluguel?
     title:str = None
     code:str = None
 

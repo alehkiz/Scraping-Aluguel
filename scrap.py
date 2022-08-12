@@ -46,8 +46,8 @@ class Request(Scraper):
         if res.status_code != 200:
                 while True:
                     if res.status_code == 429:
-                        print(f'Limite de acessos esgotado! Aguardando 1 minuto')
-                        time.sleep(60)
+                        print(f'Limite de acessos esgotado! Aguardando 30 segundos')
+                        time.sleep(30)
                     else:
                         break
                     res = requests.get(url)
