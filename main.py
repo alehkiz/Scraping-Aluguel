@@ -8,7 +8,7 @@ if __name__ == '__main__':
     console = Console()
     rq = Request()
     console.rule('[bold blue]Configurando')
-    num_pages = console.input('Informe a quantidade de páginas que serão acessadas, [gray]se nenhum valor for informado serão considerado 50 páginas, limite de 50:\n')
+    num_pages = console.input('Informe a quantidade de páginas que serão acessadas, [gray]se nenhum valor for informado serão considerado 50 páginas, limite de 400:\n')
     num_pages = ''.join(re.findall('\d', num_pages))
     num_pages = int(num_pages) if num_pages != '' else 50
     num_pages = num_pages if num_pages <= 400 else 400

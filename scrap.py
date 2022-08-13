@@ -70,6 +70,11 @@ class Request(Scraper):
             house.bedrooms = Request.get_int_from_string(dic_feats['quartos'])
             house.bathrooms = [Request.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
             house.parking = Request.get_int_from_string(dic_feats['vagas'])
+            type = soup.find(class_ = 'price__title')
+            if type != None:
+                house.type = type.text
+            else:
+                house.type = 'Não informado'
             amen = soup.find_all(class_='amenities__list')
             if not amen:
                 house.amenities = []
