@@ -1,0 +1,362 @@
+html {
+    overflow-y: scroll;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    /* display: flex; */
+    align-items: center;
+    padding-top: 80px;
+    padding-bottom: 40px;
+    background-color: #f5f5f5;
+    margin-bottom: 60px;
+}
+
+a {
+    text-decoration: none !important;
+}
+
+
+/* Article */
+
+.article-header {
+    /* padding-top: 20px;
+  padding-bottom: 20px; */
+}
+
+.article-title {
+    margin-top: 30px;
+    margin-bottom: 0;
+    font-size: 30px;
+    font-weight: 400;
+}
+
+.article-description {
+    font-size: 20px;
+    color: #999
+}
+
+.article-meta {
+    margin-bottom: 0;
+    color: #999;
+    font-size: 60% !important;
+}
+
+.article-text {
+    /* font-size: 18px; */
+    padding-top: 1rem;
+    line-height: 1.5em;
+    font-size: 1.0em;
+}
+
+.article.tag {
+    margin-bottom: 0;
+    color: #999;
+    font-size: xx-small;
+}
+
+.article-post {
+    margin-bottom: 2rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+}
+
+.nounderline {
+    text-decoration: none !important
+}
+
+blockquote {
+    padding: 10px 20px;
+    margin: 0 0 20px;
+    margin-bottom: 20px;
+    font-size: 17.5px;
+    border-left: 5px solid #eee;
+    font-size: 80% !important;
+}
+
+form>input[type=text],
+textarea {
+    border: 1px solid #ccc;
+    margin: 10px 0;
+    padding: 10px 0 10px 5px;
+    width: 100%;
+}
+
+
+/* form > input[type="submit"] {
+    background: #39506e none repeat scroll 0 0;
+    border: 1px solid #4f5c04;
+    border-radius: 25px;
+    color: #fff;
+    font-size: 16px;
+    font-style: normal;
+    line-height: 35px;
+    margin: 10px 0;
+    padding: 0;
+    text-transform: uppercase;
+    width: 30%; 
+}*/
+
+form>div>input:hover,
+form>textarea:hover {
+    background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
+    color: #5793ef;
+    transition: all 0.5s ease 0s;
+}
+
+
+/* form > input[type="submit"]:hover {
+    background: rgba(0, 0, 0, 50) none repeat scroll 0 0;
+    color: #5793ef;
+    transition: all 0.5s ease 0s;
+} */
+
+.search {
+    width: 100%;
+    margin-bottom: auto;
+    margin-top: 20px;
+    height: 50px;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px
+}
+
+.search-input {
+    color: white;
+    border: 0;
+    outline: 0;
+    background: none;
+    width: 0;
+    margin-top: 5px;
+    caret-color: transparent;
+    line-height: 20px;
+    transition: width 0.4s linear;
+    width: 350px !important;
+}
+
+.search .search-input {
+    padding: 0 10px;
+    width: 100%;
+    caret-color: #536bf6;
+    font-size: 19px;
+    font-weight: 300;
+    color: black;
+    transition: width 0.4s linear
+}
+
+.search-icon {
+    height: 35px;
+    width: 70px;
+    float: right;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    background-color: #536bf6;
+    font-size: 10px;
+    bottom: 36px;
+    position: relative;
+    border-radius: 5px;
+    right: 10px;
+}
+
+.accordion-body {
+    padding-top: 2rem !important;
+}
+
+.accordion-footer {
+    padding: 1rem 1.25rem;
+    color: #999;
+}
+
+.accordion-head {
+    padding: 0.5rem 0.25rem;
+    /* border: solid #dee2e6;
+    border-radius: .25rem;
+    border-width: 1px; */
+}
+
+.accordion-header {
+    border: solid #dee2e6;
+    border-radius: .25rem;
+    border-width: 0.5px;
+}
+
+.accordion-head-info {
+    float: left;
+    padding: 0.5rem 1rem;
+    color: #999;
+    font-size: 80% !important;
+}
+
+.accordion-head-buttons {
+    float: right;
+    padding: 0.5rem 1rem;
+}
+
+.accordion-border {
+    border: solid #63a1df !important;
+    border-radius: .25rem;
+    border-width: 1px !important;
+}
+
+.like-button,
+.save-button {
+    /* color: currentColor !important; */
+    text-decoration: none !important;
+    /* text-decoration-color: transparent; */
+}
+
+.unlike {
+    color: red !important;
+}
+
+.unsave {
+    color: blue !important;
+}
+
+.save {
+    color: black !important;
+}
+
+.saved {
+    color: blue;
+}
+
+@media all and (min-width: 992px) {
+    .dropdown-menu li {
+        position: relative;
+    }
+    .nav-item .submenu {
+        display: none;
+        position: absolute;
+        left: 100%;
+        top: -7px;
+    }
+    .nav-item .submenu-left {
+        right: 100%;
+        left: auto;
+    }
+    /* .dropdown-menu>li:hover {
+        background-color: #f1f1f1
+    } */
+    .dropdown-menu>li:hover>.submenu {
+        display: block;
+    }
+}
+
+
+
+
+Segue o exemplo que mencionou funcionando, naõ esqueça de importar o bootstrap js, e o jquery alem do css.
+
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -6px;
+    margin-left: -1px;
+    -webkit-border-radius: 0 6px 6px 6px;
+    -moz-border-radius: 0 6px 6px;
+    border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+}
+
+.dropdown-submenu>a:after {
+    display: block;
+    content: " ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 5px 0 5px 5px;
+    border-left-color: #ccc;
+    margin-top: 5px;
+    margin-right: -10px;
+}
+
+.dropdown-submenu:hover>a:after {
+    border-left-color: #fff;
+}
+
+.dropdown-submenu.pull-left {
+    float: none;
+}
+
+.dropdown-submenu.pull-left>.dropdown-menu {
+    left: -100%;
+    margin-left: 10px;
+    -webkit-border-radius: 6px 0 6px 6px;
+    -moz-border-radius: 6px 0 6px 6px;
+    border-radius: 6px 0 6px 6px;
+}
+
+
+/* ============ desktop view .end// ============ */
+
+
+/* ============ small devices ============ */
+
+@media (max-width: 991px) {
+    .dropdown-menu .dropdown-menu {
+        margin-left: 0.7rem;
+        margin-right: 0.7rem;
+        margin-bottom: .5rem;
+    }
+}
+
+#nav_bar {
+    height: 4.2em;
+}
+
+i.fas.circle {
+    display: inline-block;
+    border-radius: 60px;
+    box-shadow: 0px 0px 2px #888;
+    padding: 0.5em 0.6em;
+    background-color: #5793ef;
+}
+
+i.fas.circle:hover {
+    box-shadow: 0px 0px 2px #5793ef;
+    background-color: #287eff
+}
+
+.error-template {
+    padding: 40px 15px;
+    text-align: center;
+}
+
+.error-actions {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.error-actions .btn {
+    margin-right: 10px;
+}
+
+.ui-autocomplete {
+    position: absolute;
+    cursor: default;
+    z-index: 90000 !important;
+}

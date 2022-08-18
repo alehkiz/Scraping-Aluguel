@@ -15,3 +15,13 @@ class BaseConfig(object):
     SECURITY_CHANGEABLE = True
     BLUEPRINTS_DIR = join(APP_DIR, 'blueprints')
     LOG_DIR = join(BASE_DIR, r'logs')
+
+class DevelopmentConfig(BaseConfig):
+    ...
+
+class ProductionConfig(BaseConfig):
+    ...
+
+config = {'development': DevelopmentConfig,
+          'production': ProductionConfig}
+
