@@ -1,10 +1,30 @@
 {% extends 'base.html' %}
+{% import "macros/form.html" as macros %}
 
 {% block app_content %}
 
 <div class="containter">
-    <form action="GET">
-        <input type="text">
+    <h3>Calculadora de Aluguel</h3>
+    <form method="POST" action="">
+    <div class="row">
+        <div class="col-sm">
+            {{macros.render_field(form.bedrooms,class='form-control')}}
+        </div>
+        <div class="col-sm">
+            {{macros.render_field(form.bathrooms, class='form-control')}}
+        </div>
+        <div class="col-sm">
+            {{macros.render_field(form.parking, class='form-control')}}
+        </div>
+      
+        {{macros.render_field(form.neighborhood, class='form-control')}}
+        
+    </div>
+    <br>
+    <div class="row">
+        {{ macros.render_field(form.submit, class="btn btn-primary", nolabel=True)}}
+
+        </div>
     </form>
 </div>
 
