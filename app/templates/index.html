@@ -6,6 +6,7 @@
 <div class="containter">
     <h3>Calculadora de Aluguel</h3>
     <form method="POST" action="">
+    {{ form.csrf_token }}
     <div class="row">
         <div class="col-sm">
             {{macros.render_field(form.bedrooms,class='form-control')}}
@@ -15,6 +16,9 @@
         </div>
         <div class="col-sm">
             {{macros.render_field(form.parking, class='form-control')}}
+        </div>
+        <div class="col-sm">
+            {{macros.render_field(form.area, class='form-control')}}
         </div>
       
         {{macros.render_field(form.neighborhood, class='form-control')}}
@@ -27,5 +31,10 @@
         </div>
     </form>
 </div>
-
+{% if predict %}
+<br>
+<br>
+<br>
+<div class="p-3 mb-2 bg-success text-white">Valor estimado do apartamento: {{predict}}</div>
+{% endif %}
 {% endblock %}
