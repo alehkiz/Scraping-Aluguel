@@ -23,3 +23,6 @@ def index():
         return render_template('index.html', form=form, predict=predict)
 
     return render_template('index.html', form=form)
+
+
+#TODO add api

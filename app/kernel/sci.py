@@ -32,7 +32,8 @@ class Pipeline(object):
             area (int): Size area
             tenement (str): neighborhood in string
         """
-        bairro = self.ordinal_encoder.fit_transform([[tenement]]).flatten()[0]
+        bairro = self.ordinal_encoder.transform([[tenement]]).flatten()[0]
+        print(f'Bairro: {tenement}:{bairro}')
         self.data = [bedrooms, bathrooms, parking, area, bairro]
     
     def predict(self):
