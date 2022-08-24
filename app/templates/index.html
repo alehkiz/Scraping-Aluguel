@@ -51,7 +51,11 @@
             data: form.serialize(),
             success: function (data) {
                 $('#result').show()
-                $('#result').text('Valor estimado do aluguel do imóvel é de: ' + data['valor'])
+                $('#result').empty()
+                $('#result').append('Valor estimado do aluguel do imóvel é de: ' 
+                    + data['valor'] + "<br>" + 'Os dados estão ok? <a href=' 
+                    + data["url_validate"]+' class="link-dark">Sim</a>')
+                
             }
         });
     })

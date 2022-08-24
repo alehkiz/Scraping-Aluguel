@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app as app, render_template, request, jsonify, abort
+from flask import Blueprint, current_app as app, render_template, request, jsonify, abort, url_for
 
 from app.forms.tenement import Tenement
 from app.kernel.sci import Pipeline
@@ -33,7 +33,8 @@ def get_price():
         db.session.add(im)
         db.session.commit()
         return jsonify({'valor': predict,
-                        'id': im.id})
+                        'id': im.id,
+                        'url_validate': url_for('api.validate', id=im.id)})
     return abort(404)
 @bp.route('/validate/<int:id>')
 def validate(id):

@@ -7,7 +7,7 @@ class BaseConfig(object):
 
     locale = locale
     locale.setlocale( locale.LC_ALL, 'Portuguese_Brazil.1252' )
-    PROJECT_NAME = 'Vega'
+    PROJECT_NAME = 'House_Price'
     SITE_TITLE = environ.get('PROJECT_NAME') or 'Calculadora'
     SECRET_KEY = environ.get(
         'SERVER_KEY')

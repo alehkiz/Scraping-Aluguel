@@ -15,7 +15,7 @@
     <link href="{{url_for('static', filename='css/jquery/jquery-ui.min.css')}}" rel="stylesheet"> {% endblock %}
 
     <title>
-        {% block title %} {% if title %}{{ title }} - {{config['SITE_TITLE']}}{% else %}{{config['SITE_TITLE']}} - Tire suas dúvidas{% endif %} {% endblock %}
+        {% block title %} {% if title %}{{ title }} - {{config['SITE_TITLE']}}{% else %}{{config['SITE_TITLE']}} - Calculadora de Aluguel{% endif %} {% endblock %}
     </title>
     {% endblock %}
 </head>
@@ -28,20 +28,17 @@
     <main class="container pb-5">
         {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %}
         <div class="alert alert-{{ category if category else 'info' }}" role="alert">{{ message }}</div>
-        {% endfor %} {% endif %} {% endwith %} {# application content needs to be provided in the app_content block #} {% block app_content %} {% endblock %}
+        {% endfor %} {% endif %} {% endwith %} 
+         {% block app_content %} {% endblock %}
     </main>
     {% endblock %} 
-    <!-- Optional JavaScript -->
 
-
-    <!-- Navbar -->
-
-    <footer class="footer fixed-bottom mt-auto py-2 bg-dark">
+    <!-- <footer class="footer fixed-bottom mt-auto py-2 bg-dark">
         <div class="container d-flex justify-content-around">
             <span class="text-muted">Calculadora de Aluguel</span>
         </div>
 
-    </footer>
+    </footer> -->
 
     {% block scripts %}
     <script src="{{url_for('static', filename='js/jquery/jquery.min.js')}}" type="text/javascript"></script>
