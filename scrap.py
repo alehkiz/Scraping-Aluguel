@@ -41,8 +41,7 @@ class Request(Scraper):
         try:
             res =  requests.get(url)
         except Exception as e:
-            ...
-            # print(f'Houve uma exceção na página {url}\n{e}')
+            print(f'Houve uma exceção na página {url}\n{e}')
         if res.status_code != 200:
                 while True:
                     if res.status_code == 429:
@@ -70,6 +69,7 @@ class Request(Scraper):
             house.bedrooms = Request.get_int_from_string(dic_feats['quartos'])
             house.bathrooms = [Request.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
             house.parking = Request.get_int_from_string(dic_feats['vagas'])
+            house.description = soup.find(class_ = 'description__body').text
             type = soup.find(class_ = 'price__title')
             if type != None:
                 house.type = type.text

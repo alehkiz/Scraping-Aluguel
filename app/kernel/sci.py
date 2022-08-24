@@ -33,9 +33,11 @@ class Pipeline(object):
             tenement (str): neighborhood in string
         """
         bairro = self.ordinal_encoder.transform([[tenement]]).flatten()[0]
-        print(f'Bairro: {tenement}:{bairro}')
+        # print(f'Bairro: {tenement}:{bairro}')
         self.data = [bedrooms, bathrooms, parking, area, bairro]
-    
+    def get_neighborhood_id(self, neighborhood:str) -> str:
+        return self.ordinal_encoder.transform([[neighborhood]]).flatten()[0]
+        
     def predict(self):
         """After load run predict to get value of price of rent of house.
         Return value in reais rounded

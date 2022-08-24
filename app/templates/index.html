@@ -3,38 +3,57 @@
 
 {% block app_content %}
 
-<div class="containter">
+<div id='main_content' class="containter">
     <h3>Calculadora de Aluguel</h3>
-    <form method="POST" action="">
-    {{ form.csrf_token }}
-    <div class="row">
-        <div class="col-sm">
-            {{macros.render_field(form.bedrooms,class='form-control')}}
+    <form method="POST" action="{#{{url_for('api.get_price')}}#}">
+        {{ form.csrf_token }}
+        <div class="row">
+            <div class="col-sm">
+                {{macros.render_field(form.bedrooms,class='form-control')}}
+            </div>
+            <div class="col-sm">
+                {{macros.render_field(form.bathrooms, class='form-control')}}
+            </div>
+            <div class="col-sm">
+                {{macros.render_field(form.parking, class='form-control')}}
+            </div>
+            <div class="col-sm">
+                {{macros.render_field(form.area, class='form-control')}}
+            </div>
+
+            {{macros.render_field(form.neighborhood, class='form-control')}}
+
         </div>
-        <div class="col-sm">
-            {{macros.render_field(form.bathrooms, class='form-control')}}
-        </div>
-        <div class="col-sm">
-            {{macros.render_field(form.parking, class='form-control')}}
-        </div>
-        <div class="col-sm">
-            {{macros.render_field(form.area, class='form-control')}}
-        </div>
-      
-        {{macros.render_field(form.neighborhood, class='form-control')}}
-        
-    </div>
-    <br>
-    <div class="row">
-        {{ macros.render_field(form.submit, class="btn btn-primary", nolabel=True)}}
+        <br>
+        <div class="row">
+            {{ macros.render_field(form.submit, class="btn btn-primary", nolabel=True)}}
 
         </div>
     </form>
 </div>
-{% if predict %}
 <br>
 <br>
-<br>
+<!-- {% if predict %}
+
 <div class="p-3 mb-2 bg-success text-white">Valor estimado do apartamento: {{predict}}</div>
-{% endif %}
+{% endif %} -->
+<div id='result' class="p-3 mb-2 bg-success text-white rounded" style="display: none;"></div>
+{% endblock %}
+
+{% block scripts %} {{ super() }}
+<script type="text/javascript">
+    $('form').submit(function (event) {
+        var form = $(this);
+        event.preventDefault()
+        $.ajax({
+            url: "{{url_for('api.get_price')}}",
+            type: "POST",
+            data: form.serialize(),
+            success: function (data) {
+                $('#result').show()
+                $('#result').text('Valor estimado do aluguel do imóvel é de: ' + data['valor'])
+            }
+        });
+    })
+</script>
 {% endblock %}
