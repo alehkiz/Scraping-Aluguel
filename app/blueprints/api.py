@@ -34,9 +34,15 @@ def get_price():
         db.session.commit()
         return jsonify({'valor': predict,
                         'id': im.id,
-                        'url_validate': url_for('api.validate', id=im.id)})
+                        'url_validate': url_for('api.validate', id=im.id, type=True)})
     return abort(404)
-@bp.route('/validate/<int:id>')
-def validate(id):
-    '''Retorna os bairros cadastrads previamente'''
-    ...
+@bp.route('/validate/<int:id>/<type>')
+def validate(id:int, type: str):
+    '''Valida um determinado ID'''
+    im = Immobile.query.filter(Immobile.id == id).first_or_404()
+    if type == 'VALID':
+        im.validate = True
+    else:
+        im.validate = False
+    db.session.commit()
+    return {'status':True}
