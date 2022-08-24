@@ -14,3 +14,4 @@ selenium==4.4.3
 SQLAlchemy==1.4.39
 tqdm==4.62.3
 WTForms==2.3.3
+gunicorn
