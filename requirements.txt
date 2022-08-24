@@ -7,11 +7,10 @@ Flask_WTF==1.0.1
 joblib==1.0.1
 numpy==1.21.4
 pandas==1.4.2
-requests==2.22.0
+# requests==2.22.0
 rich==12.5.1
 scikit_learn==1.1.2
 selenium==4.4.3
 SQLAlchemy==1.4.39
 tqdm==4.62.3
 WTForms==2.3.3
-urllib3[socks] == 1.26.12
