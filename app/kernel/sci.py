@@ -45,6 +45,7 @@ class Pipeline(object):
         if not self.data:
             raise Exception('Primeiro rode load e informe os dados do aportamento')
         self.predict_value_orig = self.pipeline.predict(np.array(self.data).reshape(1,-1))
-        self.predict_value_real = np.exp(self.predict_value_orig)
-        return config.locale.currency(np.round(self.predict_value_real[0], decimals=2))
+        self.predict_value_real = np.round(np.exp(self.predict_value_orig), decimals=2)[0]
+        return {'original': self.predict_value_real,
+                'monetary': config.locale.currency(self.predict_value_real)}
         

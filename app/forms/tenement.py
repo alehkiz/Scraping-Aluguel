@@ -10,3 +10,4 @@ class Tenement(FlaskForm):
     area = IntegerField("Area", validators=[NumberRange(0, 100, message='Aceitos apenas números entre 0 e 100')] , widget=NumberInput(min=0, max=100, step=1))
     neighborhood = StringField('Bairro', validators=[DataRequired('Item obrigatório')])
     submit = SubmitField('Enviar')
+

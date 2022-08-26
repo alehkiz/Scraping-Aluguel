@@ -12,3 +12,5 @@ class Immobile(db.Model):
     neighborhood = db.Column(db.Integer, unique=False, nullable=True)
     s_neighborhood = db.Column(db.String, unique=False, nullable=True)
     validate = db.Column(db.Boolean, unique=False, nullable=True)
+    price = db.Column(db.Float, unique=False, nullable=True)
+    correct_value = db.Column(db.Float, unique=False, nullable=True)

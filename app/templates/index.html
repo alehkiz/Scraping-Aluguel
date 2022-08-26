@@ -5,7 +5,7 @@
 
 <div id='main_content' class="containter">
     <h3>Calculadora de Aluguel</h3>
-    <form method="POST" action="{#{{url_for('api.get_price')}}#}">
+    <form method="POST" id='main_form' action="{#{{url_for('api.get_price')}}#}">
         {{ form.csrf_token }}
         <div class="row">
             <div class="col-sm">
@@ -42,7 +42,7 @@
 
 {% block scripts %} {{ super() }}
 <script type="text/javascript">
-    $('form').submit(function (event) {
+    $('#main_form').submit(function (event) {
         var form = $(this);
         event.preventDefault()
         $.ajax({
@@ -52,12 +52,52 @@
             success: function (data) {
                 $('#result').show()
                 $('#result').empty()
-                $('#result').append('Valor estimado do aluguel do imóvel é de: ' 
-                    + data['valor'] + "<br>" + 'Os dados estão ok? <a href=' 
-                    + data["url_validate"]+' class="link-dark">Sim</a>')
+                $('#result').append('<p id="valor">Valor estimado do aluguel do imóvel é de: ' 
+                    + data['valor'] + "</p><hr>" )
+                $("#result").append('<div id="values-container"></div>')
+                $("#values-container").append('<p id="confirm-value">Os dados estão ok? <a href=' 
+                    + data["url_validate"]+' class="link-dark confirm_rent_value">Sim</a></p>'
+                    + '<p id="incorrect-value">Os valoes estão errados, informe o valor que você gostaria de aluguar:'
+                    + '<p id="p_new_value"></p>')
+                $('#p_new_value').append('<form id="new-value" action='+ data["url_correct"] +'></form>')
+                $('#new-value').append('<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>')
+                $('#new-value').append('<input class="form-control" id="input-correct-value" max="100000" min="100" name="input-correct-value" placeholder="" size="" step="1" type="number" value="">')
+                $('#new-value').append('<input class="btn btn-primary" id="submit" name="submit" placeholder="" size="" type="submit" value="Enviar">')
                 
             }
         });
     })
+
+    $(document).on('submit', '#new-value', function (event) {
+        var form = $(this);
+        event.preventDefault()
+        $.ajax({
+            url: form.attr('action'),
+            type: "POST",
+            data: form.serialize(),
+            success: function (data) {
+                if (data['status'] == true){
+                    $("#values-container").empty()
+                    $("#values-container").append('Obrigado, salvamos os dados')
+                } else {
+                    $("#values-container").append('Ocorreu um erro, tente novamente')
+                }
+                 }
+        });
+    })
+    $(document).on("click", '.confirm_rent_value', function(event) { 
+        event.preventDefault();
+        var link = $(this)
+        $.ajax({
+            url: link.attr('href'),
+            type: 'GET',
+            success: function(data){
+                console.log(data)
+                $('#values-container').empty()
+                $('#values-container').append('<p id="confirmed-value">Obrigado, salvamos sua confirmação.</p>')
+            }
+            
+        })
+    });
 </script>
 {% endblock %}

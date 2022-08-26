@@ -1,3 +1,4 @@
+import json
 from flask import Blueprint, current_app as app, render_template, request, jsonify, abort, url_for
 
 from app.forms.tenement import Tenement
@@ -30,19 +31,34 @@ def get_price():
         im.area = form.area.data
         im.s_neighborhood = form.neighborhood.data 
         im.neighborhood = pipeline.get_neighborhood_id(im.s_neighborhood)
+        im.price = predict['original']
         db.session.add(im)
         db.session.commit()
-        return jsonify({'valor': predict,
+        return jsonify({'valor': predict['monetary'],
                         'id': im.id,
-                        'url_validate': url_for('api.validate', id=im.id, type=True)})
+                        'url_validate': url_for('api.validate', id=im.id, type=True),
+                        'url_correct': url_for('api.correct', id=im.id)})
     return abort(404)
 @bp.route('/validate/<int:id>/<type>')
 def validate(id:int, type: str):
     '''Valida um determinado ID'''
     im = Immobile.query.filter(Immobile.id == id).first_or_404()
+    if not im.validate is None:
+        return jsonify({'status': False, 'message':'Validação já feita, não é possível alterar'})
     if type == 'VALID':
         im.validate = True
     else:
         im.validate = False
     db.session.commit()
-    return {'status':True}
+    return jsonify({'status':True})
+
+@bp.route('correct/<int:id>', methods=['POST'])
+def correct(id: int):
+    'Corrige o valor do aluguel de acordo com informação inserida pelo usuário.'
+    print(request.form.get('input-correct-value'))
+    im = Immobile.query.filter(Immobile.id == id).first_or_404()
+    if request.form.get('input-correct-value', False) != False:
+        im.correct_value = request.form.get('input-correct-value')
+        db.session.commit()
+        return jsonify({'status': True})
+    return jsonify({'status': False})
