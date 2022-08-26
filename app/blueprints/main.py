@@ -1,4 +1,3 @@
-from asyncio.windows_utils import PipeHandle
 from flask import Blueprint, current_app as app, render_template, url_for, redirect
 from app.forms.tenement import Tenement
 from app.kernel.sci import Pipeline
