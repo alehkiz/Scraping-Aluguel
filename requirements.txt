@@ -9,9 +9,11 @@ numpy==1.21.4
 pandas==1.4.2
 # requests==2.22.0
 rich==12.5.1
-scikit_learn==1.1.2
+scikit_learn==1.0.2
 selenium==4.4.3
 SQLAlchemy==1.4.39
 tqdm==4.62.3
 WTForms==2.3.3
 gunicorn
+python-dotenv == 0.20.0
+psycopg2 == 2.9.3
