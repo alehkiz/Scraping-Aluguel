@@ -6,7 +6,7 @@ import locale
 class BaseConfig(object):
 
     locale = locale
-    locale.setlocale( locale.LC_ALL, 'Portuguese_Brazil.1252' )
+    locale.setlocale( locale.LC_ALL, 'pt_BR.UTF-8' )
     PROJECT_NAME = 'House_Price'
     SITE_TITLE = environ.get('PROJECT_NAME') or 'Calculadora'
     SECRET_KEY = environ.get(
