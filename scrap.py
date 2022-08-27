@@ -13,6 +13,7 @@ class Request(Scraper):
         self.houses = self.load_houses()
         self.houses = self.houses if self.houses != None else {}
         self.links = self.load_links()
+        self.links = [] if self.links is None else self.links
     def load(self, page_num:int = 0, limit_range:int=100):
         lst_save_time = datetime.now()
         save_time = timedelta(minutes=3)
@@ -29,10 +30,14 @@ class Request(Scraper):
                 print(f'Ocorreu um erro no acesso: {res.status_code}, página: {url}')
             soup = BS(res.text, 'html.parser')
             result = soup.find(class_ = 'results-list')
+
             items = result.find_all(class_ = 'property-card__content-link')
             self.links.extend(['https://www.vivareal.com.br'+_.get('href') for _ in items])
             current_page += 1
             current_url_page = Request.change_query_string_on_url(current_url_page, {'pagina': current_page})
+            if datetime.now() > lst_save_time + save_time:
+                self.save_links()
+                lst_save_time = datetime.now()
         self.save_links()
         # print(f'Links salvos às {datetime.now().strftime("%d/%m/%y, %H:%M:%S")}, página: {current_page}')
     def get_info(self, url : str, save=True):
@@ -69,10 +74,10 @@ class Request(Scraper):
             house.bedrooms = Request.get_int_from_string(dic_feats['quartos'])
             house.bathrooms = [Request.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
             house.parking = Request.get_int_from_string(dic_feats['vagas'])
-            house.description = soup.find(class_ = 'description__body').text
+            house.description = soup.find(class_ = 'description__body').text.strip()
             type = soup.find(class_ = 'price__title')
             if type != None:
-                house.type = type.text
+                house.type = type.text.strip()
             else:
                 house.type = 'Não informado'
             amen = soup.find_all(class_='amenities__list')
