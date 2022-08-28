@@ -1,4 +1,4 @@
-from scrap import Request, teste
+from scrap import Request
 from config import *
 from data import *
 from rich.console import Console

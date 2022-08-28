@@ -31,29 +31,29 @@ class Request(Scraper):
         if not Request._check_url(self.driver.current_url) is True:
             raise Exception('Houve um erro no acesso')
 
-
-
-
-
-
-
-
-
-    def load(self, page_num:int = 0, limit_range:int=100):
+    def load(self, page_num:int = 0, limit_range:int=100, selenium=True):
         lst_save_time = datetime.now()
         save_time = timedelta(minutes=3)
         current_page = page_num
         current_url_page = config.url_base
+        self.driver.implicitly_wait(4)
         for i in tqdm(range(0, limit_range)):
-            time.sleep(1)
+            
             url = Request.change_query_string_on_url(config.url_base, {'pagina': current_page})
             try:
-                res = requests.get(url)
+                if selenium:
+                    self.driver.get(url)
+                    page_source = self.driver.page_source
+                else:
+                    res = requests.get(url)
+                    # status_code = res.status_code
+                    page_source = res.text
+                    if res.status_code != 200:
+                        print(f'Ocorreu um erro no acesso: {res.status_code}, página: {url}')
             except Exception as e:
                 print(f'Houve uma exceção na página {current_page}\n{e}')
-            if res.status_code != 200:
-                print(f'Ocorreu um erro no acesso: {res.status_code}, página: {url}')
-            soup = BS(res.text, 'html.parser')
+            time.sleep(5)
+            soup = BS(page_source, 'html.parser')
             result = soup.find(class_ = 'results-list')
 
             items = result.find_all(class_ = 'property-card__content-link')
@@ -91,14 +91,17 @@ class Request(Scraper):
         except Exception as e:
             ...
         if house.code != 'INATIVO':
-            house.title = soup.find(class_ = 'title__title').text
-            house.address = soup.find(class_= 'title__address').text
+            house.title = soup.find(class_ = 'title__title')
+            house.title = None if house.title is None else house.title.text
+            house.address = soup.find(class_= 'title__address')
+            house.address = None if house.address is None else house.address.text
             feats = soup.find(class_= 'features')
-            dic_feats = {_.get('title').lower():_.text.strip() for _ in feats.find_all() if _.get('title') != None}
-            house.area = Request.get_int_from_string(dic_feats['área'])
-            house.bedrooms = Request.get_int_from_string(dic_feats['quartos'])
-            house.bathrooms = [Request.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
-            house.parking = Request.get_int_from_string(dic_feats['vagas'])
+            if feats != None:
+                dic_feats = {_.get('title').lower():_.text.strip() for _ in feats.find_all() if _.get('title') != None}
+                house.area = Request.get_int_from_string(dic_feats['área'])
+                house.bedrooms = Request.get_int_from_string(dic_feats['quartos'])
+                house.bathrooms = [Request.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
+                house.parking = Request.get_int_from_string(dic_feats['vagas'])
             house.description = soup.find(class_ = 'description__body')
             house.description =  None if house.description is None else house.description.text.strip()
             type = soup.find(class_ = 'price__title')
