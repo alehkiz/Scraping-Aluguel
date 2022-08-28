@@ -17,6 +17,7 @@ class Selenium(Scraper):
     def __init__(self, headless=False):
         if headless:
             options = Options()
+            options.add_argument("--headless")
             options.headless = True
             self.driver = Firefox(options=options)
         else:

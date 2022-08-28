@@ -8,12 +8,37 @@ from util_class import Scraper
 from functools import reduce
 from tqdm import tqdm
 
+from selenium.webdriver import Firefox
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
+
+
 class Request(Scraper):
-    def __init__(self) -> None:
+    def __init__(self, headless : bool = False) -> None:
         self.houses = self.load_houses()
         self.houses = self.houses if self.houses != None else {}
         self.links = self.load_links()
         self.links = [] if self.links is None else self.links
+
+        if headless:
+            options = Options()
+            options.headless = True
+            self.driver = Firefox(options=options)
+        else:
+            self.driver = Firefox()
+        self.driver.get(config.url_base)
+        self.main_window = self.driver.current_window_handle
+        if not Request._check_url(self.driver.current_url) is True:
+            raise Exception('Houve um erro no acesso')
+
+
+
+
+
+
+
+
+
     def load(self, page_num:int = 0, limit_range:int=100):
         lst_save_time = datetime.now()
         save_time = timedelta(minutes=3)
@@ -74,7 +99,8 @@ class Request(Scraper):
             house.bedrooms = Request.get_int_from_string(dic_feats['quartos'])
             house.bathrooms = [Request.get_int_from_string(_) for _ in dic_feats['banheiros'].split('\n') if 'banheiro' in _]
             house.parking = Request.get_int_from_string(dic_feats['vagas'])
-            house.description = soup.find(class_ = 'description__body').text.strip()
+            house.description = soup.find(class_ = 'description__body')
+            house.description =  None if house.description is None else house.description.text.strip()
             type = soup.find(class_ = 'price__title')
             if type != None:
                 house.type = type.text.strip()
