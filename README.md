@@ -37,6 +37,6 @@ python main.py
 
 ## 📝 Licença
 
-Esse projeto está sob licença. Veja o arquivo [LICENÇA](LICENSE.md) para mais detalhes.
+Esse projeto está sob licença. Veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
 
 [⬆ Voltar ao topo](#Scraping-Aluguel)<br>
